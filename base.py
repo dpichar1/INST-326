@@ -28,8 +28,8 @@ class wallet:
       balance(float): the money the user is holding set to 0 at first: 
       transaction_history(list): empty list to hold all the transaction conducted 
     """
-    
-    None
+    self.balance = 0.00
+    self.transaction_history= []
     
   def get_balance(self):
     """
@@ -38,8 +38,7 @@ class wallet:
     Returns:
       float: the current balance 
     """
-
-    None
+    return self.balance
   def deposit(self, amount:float):
     """
     Adds money into the balance and creates and transaction object to add into the transaction history
@@ -48,10 +47,21 @@ class wallet:
       amount(float):  the amount of money to deposit
     
     Raises:
+      typeError: if amount is not a int or float value 
       valueError: if the amount is a negative value
     """
-  
-    None
+    try:
+      if not isinstance(amount, (int,float)):
+        raise TypeError()
+      if amount < 0:
+        raise ValueError()
+    except TypeError:
+      print("Amount must be a float or int value")
+    except ValueError:
+      print("Amount can't be a negative value")
+    else:
+      self.balance += amount
+      
   def withdraw(self, amount:float):
     """
     Subtracts money from the balance if there is enough and creates and traction object and adds to the transaction history 
@@ -60,10 +70,23 @@ class wallet:
       amount(float):  the amount of money to withdraw
       
     Raises:
+      typeError: if amount is not a int or float value 
       valueError: if the amount is a negative value or when there is insufficient funds to withdraw
     """
-  
-    None
+    try:
+      if not isinstance(amount, (int,float)):
+        raise TypeError()
+      if amount <0:
+        raise ValueError("Amount can't be a negative value")
+      if amount > self.balance:
+        raise ValueError("insufficient funds")
+    except TypeError:
+      print("Amount must be a float or int value")
+    except ValueError as e:
+      print(e)
+    else:
+      self.balance -= amount
+      
   def transfer_to(self,amount:float, other_wallet:wallet  ):
     """
     Subtracts money from the balance if there is enough and creates and traction object and adds to the transaction history 
