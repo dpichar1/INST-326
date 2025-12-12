@@ -2,11 +2,11 @@
 #name is subject to change
 
 
-class wallet:
+class Wallet:
   """
-  stores the current balance of the user and conducts transactions along holding the users transaction history 
+  stores the current balance of the user and conducts transactions along with holding the users transaction history 
   
-  Attributes: 
+  Attributes:
     balance(int): an empty balance
     transaction_history(list): An empty list which will hold all the transaction that happens
     
@@ -39,6 +39,7 @@ class wallet:
       float: the current balance 
     """
     return self.balance
+  
   def deposit(self, amount:float):
     """
     Adds money into the balance and creates and transaction object to add into the transaction history
@@ -61,6 +62,7 @@ class wallet:
       print("Amount can't be a negative value")
     else:
       self.balance += amount
+      #Need to add transaction
       
   def withdraw(self, amount:float):
     """
@@ -86,8 +88,9 @@ class wallet:
       print(e)
     else:
       self.balance -= amount
+      #Need to add transaction
       
-  def transfer_to(self,amount:float, other_wallet:wallet  ):
+  def transfer_to(self, amount:float, other_wallet:Wallet ):
     """
     Subtracts money from the balance if there is enough and creates and traction object and adds to the transaction history 
     
@@ -98,7 +101,24 @@ class wallet:
     Raises:
       valueError: if the amount is a negative value or when there is insufficient funds to transfer 
     """
-    None
+    try:
+      if not isinstance(amount,(int, float)):
+        raise TypeError("Amount must be a float or int value")
+      if not isinstance(other_wallet, Wallet):
+        raise TypeError("other_wallet must be a wallet object")
+      if amount <0:
+        raise ValueError("Amount can't be a negative value")
+      if amount > self.balance:
+        raise ValueError("insufficient funds")
+    except TypeError as e:
+      print(e)
+    except ValueError as e:
+      print(e)
+    else:
+      self.withdraw(amount)
+      Wallet.deposit(amount)
+      #Need to add transaction
+      
   def add_transactions(self, transaction):
     """
     Appends a transaction to the transaction history list to keep a record 
@@ -107,6 +127,7 @@ class wallet:
       transaction(transaction):  the transaction being done
     """
     None
+    
   def get_transaction_history(self):
     """
     Returns the list of transaction of the user to see their history of deposit, withdrawals and transfers 
@@ -114,15 +135,18 @@ class wallet:
     Return:
       list[transaction]: all the transactions done in the wallet
     """
-    
     None
-  def reset_wallet():
+    
+  def reset_wallet(self):
     """
     reset the wallet setting back the balance back to 0 and clearing the transaction history list
     """
+    self.balance = 0
+    self.transaction_history = [] 
     
-    None
-  def summary():
+  def summary(self):
     """
     Prints out the current balance total and the last five transactions 
     """
+    print(f'Your current balance: {self.balance}')
+    #Need to transaction
