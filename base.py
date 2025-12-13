@@ -21,7 +21,7 @@ class Transaction:
         self.to_user = to_user
 
         # Timestamp is created when the transaction happens
-        # This allows to see exactly when the action took place
+        # allows to see exactly when the action took place
         self.timestamp = datetime.now()
 
     # Returns the transaction amount
@@ -47,7 +47,7 @@ class Transaction:
         return self.timestamp
 
     # Converts the transaction into a dictionary
-    # This is used when saving transaction history to a file
+    # Used when saving transaction history to a file
     def to_dict(self):
         return {
             "amount": self.amount,
@@ -59,7 +59,7 @@ class Transaction:
         }
 
     # Recreates a Transaction object from saved dictionary data
-    # This is how transaction history is restored when the app starts again
+    # How transaction history is restored when the app starts again
     @staticmethod
     def from_dict(data):
         transaction = Transaction(
@@ -73,10 +73,9 @@ class Transaction:
         transaction.timestamp = datetime.fromisoformat(data["timestamp"])
         return transaction
 
-    # Prints a clean, readable version of the transaction
+    # Prints a clean a readable version of the transaction
     # This is what users see when they check their transaction history
     def display(self):
-        # Format the timestamp so it looks nice and readable
         time_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
         if self.transaction_type == "deposit":
@@ -88,7 +87,6 @@ class Transaction:
         elif self.transaction_type == "transfer":
             print(f"[{time_str}] Transfer of ${self.amount:.2f} "
                   f"from {self.from_user} to {self.to_user}")
-
         else:
-            # Fallback just in case a new transaction type gets added later
             print(f"[{time_str}] ${self.amount:.2f} - {self.transaction_type}")
+
