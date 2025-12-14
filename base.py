@@ -29,7 +29,7 @@ class Wallet:
       transaction_history(list): empty list to hold all the transaction conducted 
     """
     self.balance = 0.00
-    self.transaction_history= []
+    self.transaction_history = []
     
   def get_balance(self):
     """
@@ -98,7 +98,7 @@ class Wallet:
       add_transactions(transaction)
       """
       
-  def transfer_to(self, amount:float, other_user: Wallet):
+  def transfer_to(self, amount:float, other_user):
     """
     Subtracts money from the balance if there is enough and creates and traction object and adds to the transaction history 
     
