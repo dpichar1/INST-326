@@ -1,13 +1,13 @@
-import base as b
-from transaction import Transaction
-from authentication import AuthenticationManager
+from base import Wallet
+from base import Transaction
+from base import AuthenticationManager
 
 # Wallet tests
 def test_wallet_multiple_deposits():
     """
     Makes sure multiple deposits stack correctly
     """
-    wallet = b.Wallet()
+    wallet = Wallet()
     wallet.deposit(5)
     wallet.deposit(15)
     assert wallet.get_balance() == 20
@@ -16,7 +16,7 @@ def test_wallet_withdraw_happy_path():
     """
     Tests withdrawing money when there are enough funds
     """
-    wallet = b.Wallet()
+    wallet = Wallet()
     wallet.deposit(20)
     wallet.withdraw(5)
     assert wallet.get_balance() == 15
@@ -25,7 +25,7 @@ def test_wallet_withdraw_insufficient_funds():
     """
     Edge case - withdrawing more than balance should fail safely
     """
-    wallet = b.Wallet()
+    wallet = Wallet()
     wallet.withdraw(10)
     assert wallet.get_balance() == 0
 
@@ -33,7 +33,7 @@ def test_wallet_reset_clears_balance_and_history():
     """
     Tests that reset_wallet properly clears everything
     """
-    wallet = b.Wallet()
+    wallet = Wallet()
     wallet.deposit(50)
     wallet.reset_wallet()
     assert wallet.get_balance() == 0
