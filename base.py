@@ -62,11 +62,9 @@ class Wallet:
       print("Amount can't be a negative value")
     else:
       self.balance += amount
-      #Need to add transaction
-      """
-      transaction = transaction(amount, "deposit", self.user, self.user) 
-      transaction_history.append(transaction)
-      """
+      transaction = Transaction(amount, "deposit", None, None) 
+      self.add_transactions(transaction)
+      
       
   def withdraw(self, amount:float):
     """
@@ -92,11 +90,9 @@ class Wallet:
       print(e)
     else:
       self.balance -= amount
-      #Need to add transaction
-      """
-      transaction = transaction(amount, "deposit", self.user, self.user) 
-      add_transactions(transaction)
-      """
+      transaction = Transaction(amount, "withdrawal", None, None) 
+      self.add_transactions(transaction)
+      
       
   def transfer_to(self, amount:float, other_user):
     """
@@ -112,7 +108,7 @@ class Wallet:
     try:
       if not isinstance(amount,(int, float)):
         raise TypeError("Amount must be a float or int value")
-      if not isinstance(other_user, Wallet):
+      if not isinstance(other_user, ):
         raise TypeError("other_wallet must be a wallet object")
       if amount <0:
         raise ValueError("Amount can't be a negative value")
@@ -124,12 +120,10 @@ class Wallet:
       print(e)
     else:
       self.withdraw(amount)
-      Wallet.deposit(amount)
-      #Need to add transaction
-      """
-      transaction = transaction(amount, "deposit", other_user, self.user) 
-      add_transactions(transaction)
-      """
+      other_user.deposit(amount)
+      transaction = Transaction(amount, "transfer", other_user, self.user) 
+      self.add_transactions(transaction)
+      
   def add_transactions(self, transaction):
     """
     Appends a transaction to the transaction history list to keep a record 
@@ -137,7 +131,7 @@ class Wallet:
     Args:
       transaction(transaction):  the transaction being done
     """
-    "transaction_history.append(transaction)"
+    self.transaction_history.append(transaction)
     
   def get_transaction_history(self):
     """
@@ -146,7 +140,7 @@ class Wallet:
     Return:
       list[transaction]: all the transactions done in the wallet
     """
-    "return transaction_history"
+    return self.transaction_history
     
   def reset_wallet(self):
     """
@@ -160,17 +154,11 @@ class Wallet:
     Prints out the current balance total and the last five transactions 
     """
     print(f'Your current balance: {self.balance:.2f}')
-    #Need to transaction
-    "print(f'Your last five transactions')"
-    "reverse_transaction_history = traction_history[::-1]"
-    """
     print(f'Your last five transactions')
-    reverse_transaction_history = traction_history[::-1]
-    for i in range(5):
-      print(reverse_transaction_history[i])
-    """
-    
-
+    reverse_transaction_history = self.transaction_history[::-1]
+    for i in range(min(len(reverse_transaction_history), 5)):
+      reverse_transaction_history[i].display()
+  
 
 class Transaction:
     # This class represents one money action in the system

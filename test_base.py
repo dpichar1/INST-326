@@ -9,5 +9,5 @@ def test_wallet_happy_path():
 def test_wallet_edge_case():
   wallet =b.Wallet()
   wallet.deposit(-5)
-  assert wallet.balance ==0
+  assert wallet.balance == 0
   
