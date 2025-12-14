@@ -1,3 +1,6 @@
+from datetime import datetime
+from __future__ import annotations
+from typing import Any, Dict, Optional
 import hashlib
 import json
 
@@ -243,3 +246,185 @@ class Wallet(User):
     for i in range(min(len(reverse_transaction_history), 5)):
       reverse_transaction_history[i].display()
  
+class Transaction:
+    # This class represents one money action in the system
+    # It does not touch balances at all, like a receipt that gets created after something happens
+
+    def __init__(self, amount, transaction_type, from_user=None, to_user=None):
+        # amount: how much money was involved in the transaction
+        # transaction_type: "deposit", "withdrawal", or "transfer"
+        # from_user: who sent the money (None for deposits)
+        # to_user: who received the money (None for withdrawals)
+
+        # Makes sure amount is always stored as a number
+        self.amount = float(amount)
+
+        # Stores the type of transaction so we know what kind of action happened
+        self.transaction_type = transaction_type
+
+        # Stores the users involved (can be None depending on the type)
+        self.from_user = from_user
+        self.to_user = to_user
+
+        # Timestamp is created when the transaction happens
+        # allows to see exactly when the action took place
+        self.timestamp = datetime.now()
+
+    # Returns the transaction amount
+    # Used when displaying history or summaries
+    def get_amount(self):
+        return self.amount
+
+    # Returns the type of transaction (deposit, withdrawal, transfer)
+    def get_type(self):
+        return self.transaction_type
+
+    # Returns the sender of the money
+    # Mainly used for transfers
+    def get_from_user(self):
+        return self.from_user
+
+    # Returns the receiver of the money
+    def get_to_user(self):
+        return self.to_user
+
+    # Returns the time the transaction happened
+    def get_timestamp(self):
+        return self.timestamp
+
+    # Converts the transaction into a dictionary
+    # Used when saving transaction history to a file
+    def to_dict(self):
+        return {
+            "amount": self.amount,
+            "type": self.transaction_type,
+            "from_user": self.from_user,
+            "to_user": self.to_user,
+            # We convert the timestamp to a string so it can be saved properly
+            "timestamp": self.timestamp.isoformat()
+        }
+
+    # Recreates a Transaction object from saved dictionary data
+    # How transaction history is restored when the app starts again
+    @staticmethod
+    def from_dict(data):
+        transaction = Transaction(
+            data["amount"],
+            data["type"],
+            data.get("from_user"),
+            data.get("to_user")
+        )
+
+        # Convert the timestamp string back into a datetime object
+        transaction.timestamp = datetime.fromisoformat(data["timestamp"])
+        return transaction
+
+    # Prints a clean a readable version of the transaction
+    # This is what users see when they check their transaction history
+    def display(self):
+        time_str = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+
+        if self.transaction_type == "deposit":
+            print(f"[{time_str}] Deposit of ${self.amount:.2f}")
+
+        elif self.transaction_type == "withdrawal":
+            print(f"[{time_str}] Withdrawal of ${self.amount:.2f}")
+
+        elif self.transaction_type == "transfer":
+            print(f"[{time_str}] Transfer of ${self.amount:.2f} "
+                  f"from {self.from_user} to {self.to_user}")
+        else:
+            print(f"[{time_str}] ${self.amount:.2f} - {self.transaction_type}")
+
+class User:
+    """
+    User class:
+    - Stores username + hashed_password
+    - Creates/owns one wallet
+    """
+
+    def __init__(self, username: str, hashed_password: str):
+        self._username: str = username
+        self._hashed_password: str = hashed_password
+
+        # Creates a wallet (import here to avoid circular imports)
+        from wallet import Wallet  # wallet.py should exist in your project
+        self._wallet = Wallet()
+
+    # -------------------------
+    # Username
+    # -------------------------
+    def set_username(self, name: str) -> None:
+        """Updates username (display name)."""
+        self._username = name
+
+    def get_username(self) -> str:
+        """Returns username."""
+        return self._username
+
+    # -------------------------
+    # Password
+    # -------------------------
+    def set_password(self, password: str) -> None:
+        """
+        Hashes and updates password.
+        (Simple SHA-256 hash for a class project.)
+        """
+        self._hashed_password = self._hash_password(password)
+
+    def verify_password(self, password: str) -> bool:
+        """Compares entered password with stored hash (login credential check)."""
+        return self._hash_password(password) == self._hashed_password
+
+    @staticmethod
+    def _hash_password(password: str) -> str:
+        return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+    # -------------------------
+    # Wallet
+    # -------------------------
+    def get_wallet(self):
+        """Returns the wallet object."""
+        return self._wallet
+
+    # -------------------------
+    # Save / Load
+    # -------------------------
+    def to_dict(self) -> Dict[str, Any]:
+        """Converts user data to dictionary (for saving)."""
+        data: Dict[str, Any] = {
+            "username": self._username,
+            "hashed_password": self._hashed_password,
+        }
+
+        # Save wallet if it supports to_dict()
+        if hasattr(self._wallet, "to_dict"):
+            data["wallet"] = self._wallet.to_dict()
+
+        return data
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "User":
+        """Restores user from saved dictionary."""
+        user = cls(
+            username=data.get("username", ""),
+            hashed_password=data.get("hashed_password", ""),
+        )
+
+        # Restore wallet if present and Wallet supports from_dict()
+        wallet_data: Optional[Dict[str, Any]] = data.get("wallet")
+        if wallet_data is not None:
+            from wallet import Wallet
+            if hasattr(Wallet, "from_dict"):
+                user._wallet = Wallet.from_dict(wallet_data)
+
+        return user
+
+    # -------------------------
+    # Debug
+    # -------------------------
+    def display_information(self) -> None:
+        """Print basic user information (debug)."""
+        print(f"User: {self._username}")
+        if hasattr(self._wallet, "get_balance"):
+            print(f"Balance: {self._wallet.get_balance()}")
