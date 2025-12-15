@@ -348,7 +348,7 @@ class User:
         self._hashed_password: str = hashed_password
 
         # Creates a wallet (import here to avoid circular imports)
-        from wallet import Wallet  # wallet.py should exist in your project
+        from wallet import Wallet 
         self._wallet = Wallet()
 
     # -------------------------
