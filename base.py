@@ -81,6 +81,17 @@ class AuthenticationManager:
         return self.users.pop(username, None)
       
     def __eq__(self, other: AuthenticationManager):
+        """
+        Check if this AuthenticationManager object is the same as another AuthenticationManager object 
+        
+        Args:
+            
+            other(AuthenticationManager): the other AuthenticationManager object to compare too 
+      
+        Returns:
+          bool: True if users attributes are the same as the other AuthenticationManager attributes 
+          NotImplemented: if the other is not a AuthenticationManager object  
+        """
         if not isinstance(other, AuthenticationManager):
           return NotImplemented
         return self.users == other.users
@@ -151,6 +162,17 @@ class User:
             }
         }
     def __eq__(self, other:User):
+        """
+        Check if this User object is the same as another User object 
+        
+        Args:
+            
+            other(wallet): the other User object to compare too 
+      
+        Returns:
+          bool: True if _username, _hashed_password, and _wallet attributes are the same as the other User attributes 
+          NotImplemented: if the other is not a User object  
+        """
         if not isinstance(other, User):
           return NotImplemented
         return self._username == other._username and self._hashed_password == other._hashed_password and self._wallet == other._wallet
@@ -326,11 +348,15 @@ class Wallet:
                 reverse_transaction_history[i].display()
     def __eq__(self, other:Wallet):
         """
-        Check if this wallet object is the same as another waller object 
+        Check if this Wallet object is the same as another waller object 
         
-        :param self: Description
-        :param other: Description
-        :type other: Wallet
+        Args:
+            
+            other(Wallet): the other Wallet object to compare too 
+      
+        Returns:
+          bool: True if balance and transaction_history attributes are the same as the other Wallet attributes 
+          NotImplemented: if the other is not a Wallet object  
         """
         if not isinstance(other, Wallet):
           return NotImplemented
