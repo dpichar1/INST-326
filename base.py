@@ -79,7 +79,11 @@ class AuthenticationManager:
     def remove_user(self, username):
         """Removes a user by username, returning true if removed or false if not found."""
         return self.users.pop(username, None)
-
+      
+    def __eq__(self, other: AuthenticationManager):
+        if not isinstance(other, AuthenticationManager):
+          return NotImplemented
+        return self.users == other.users
 
 # User class
 class User:
@@ -146,6 +150,10 @@ class User:
                 ]
             }
         }
+    def __eq__(self, other:User):
+        if not isinstance(other, User):
+          return NotImplemented
+        return self._username == other._username and self._hashed_password == other._hashed_password and self._wallet == other._wallet
 
     @staticmethod
     def from_dict(data):
@@ -316,7 +324,17 @@ class Wallet:
             reverse_transaction_history = self.transaction_history[::-1]
             for i in range(min(len(reverse_transaction_history), 5)):
                 reverse_transaction_history[i].display()
-
+    def __eq__(self, other:Wallet):
+        """
+        Check if this wallet object is the same as another waller object 
+        
+        :param self: Description
+        :param other: Description
+        :type other: Wallet
+        """
+        if not isinstance(other, Wallet):
+          return NotImplemented
+        return self.balance == other.balance and self.transaction_history == other.transaction_history
 
 # Transaction class
 class Transaction:

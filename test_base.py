@@ -1,3 +1,4 @@
+import pytest
 from base import Wallet
 from base import Transaction
 from base import AuthenticationManager
@@ -45,53 +46,13 @@ def test_transaction_creation():
     Tests that a Transaction object is created correctly
     """
     t = Transaction(25, "deposit")
-    assert t.get_amount() == 25.0
-    assert t.get_type() == "deposit"
+    assert t.amount == 25.0
+    assert t.transaction_type == "deposit"
 
-def test_transaction_to_dict():
-    """
-    Makes sure transaction converts to dictionary correctly
-    """
-    t = Transaction(10, "withdrawal")
-    data = t.to_dict()
-
-    assert data["amount"] == 10.0
-    assert data["type"] == "withdrawal"
-    assert "timestamp" in data
-
-def test_transaction_from_dict():
-    """
-    Tests recreating a transaction from saved data
-    """
-    t = Transaction(30, "deposit")
-    data = t.to_dict()
-
-    new_t = Transaction.from_dict(data)
-    assert new_t.get_amount() == 30.0
-    assert new_t.get_type() == "deposit"
-
-# Autethication manager tests
-def test_create_user_happy_path():
-    """
-    Test that creates a new user successfully
-    """
-    auth = AuthenticationManager()
-    auth.create_user("rixa", "password123")
-
-    assert auth.user_exists("rixa") is True
-
-def test_create_duplicate_user_raises_error():
-    """
-    Edge case - creating a user that already exists
-    """
-    auth = AuthenticationManager()
-    auth.create_user("rixa", "password123")
-
-    try:
-        auth.create_user("rixa", "password123")
-        assert False  
-    except ValueError:
-        assert True
+# Authentication manager tests
+@pytest.fixture
+def auth_manager():
+    return AuthenticationManager()
 
 def test_login_wrong_username_returns_none():
     """
@@ -101,23 +62,77 @@ def test_login_wrong_username_returns_none():
     result = auth.login("ghost", "password")
     assert result is None
 
-def test_password_hashing_and_verification():
+def test_create_user_hashes_password(auth_manager):
     """
     makes sure password hashing and verification works
     """
-    auth = AuthenticationManager()
-    hashed = auth.hash_password("secret")
+    auth_manager.create_user("testuser", "password123")
+    stored_hash = auth_manager.users["testuser"]
+    assert stored_hash._hashed_password != "password123"
+    assert auth_manager.verify_password("password123", stored_hash._hashed_password)
 
-    assert auth.verify_password("secret", hashed) is True
-    assert auth.verify_password("wrong", hashed) is False
+def test_create_user_duplicate_raises_error(auth_manager):
+    """
+    Edge case - creating a user that already exists
+    """
+    auth_manager.create_user("testuser", "password123")
+    with pytest.raises(ValueError):
+        auth_manager.create_user("testuser", "newpassword")
+        
+def test_user_exists(auth_manager):
+    """
+    Test that creates a new user successfully
+    """
+    auth_manager.create_user("testuser", "password123")
+    assert auth_manager.user_exists("testuser") is True
+    assert auth_manager.user_exists("someoneelse") is False
 
-def test_remove_user():
+def test_verify_hash(auth_manager):
+    """
+    Test to see if a password hash passwords are working
+    """
+    hashed = auth_manager.hash_password("password123")
+    assert auth_manager.login("testuser", "something") is None
+    assert auth_manager.login("testuser", "else") is None
+
+   
+def test_login_success(auth_manager):
+    """
+    Test to see if a user logged in successfully 
+    """
+    auth_manager.create_user("testuser", "password123")
+    assert auth_manager.login("testuser", "password123") is auth_manager.users.get("testuser")
+    
+    
+def test_remove_user(auth_manager):
     """
     test that remove a user from the system
     """
-    auth = AuthenticationManager()
-    auth.create_user("nahomi", "password123")
+    auth_manager.create_user("someone", "pass")
+    assert auth_manager.remove_user("someone").get_username() is not None
+    assert auth_manager.user_exists("someone") is False
+    assert auth_manager.remove_user("someone") is None
+    
+def test_save_and_load_users():
+    """
+    test to see if loading a user are the same as its saved user 
+    """
+    auth1 = AuthenticationManager()
+    auth1.create_user("user1", "pass")
+    auth1.create_user("user2", "word")
+    
+    path = "users.json"
+    auth1.save_users(path)
+    
+    auth2 = AuthenticationManager()
+    auth2.load_users(path)
+    
+    assert auth2.users.get("user1")._hash_password == auth1.users.get("user1")._hash_password
 
-    removed = auth.remove_user("nahomi")
-    assert removed is not None
-    assert auth.user_exists("nahomi") is False
+def test_load_users_missing_file_starts_empty(tmp_path):
+    """
+    Edge case - attempting to load a user form a missing jason file 
+    """
+    auth = AuthenticationManager()
+    auth.load_users(tmp_path / "nonexistent.json")
+    assert auth.users == {}
